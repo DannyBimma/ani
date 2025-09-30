@@ -4,6 +4,9 @@ add_executable(ani
 	main.c
 	util/log.c
 	util/version.c
+	util/str.c
+	util/time.c
+	util/fs.c
 )
 
 target_include_directories(ani PRIVATE
