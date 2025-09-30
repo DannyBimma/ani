@@ -11,6 +11,7 @@ add_executable(ani
 	json/json_wrap.c
 	models/model.c
 	providers/jikan.c
+	providers/anilist.c
 	providers/mangadex.c
 	cli/args.c
 	cli/output.c

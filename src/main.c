@@ -11,6 +11,7 @@
 #include "ani/http.h"
 #include "ani/models.h"
 #include "ani/providers/jikan.h"
+#include "ani/providers/anilist.h"
 #include "ani/providers/mangadex.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -46,6 +47,11 @@ process_query(const ani_cli_options *opts)
 			anime_success = ani_jikan_search_anime(opts->query, result->anime);
 			if (anime_success) {
 				result->has_anime = true;
+
+				/* Get next episode schedule from AniList */
+				if (result->anime->id != NULL) {
+					ani_anilist_get_next_episode(result->anime->id, result->anime);
+				}
 			} else {
 				LOG_WARN("Anime search failed or no results");
 				ani_series_free(result->anime);
