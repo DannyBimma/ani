@@ -10,6 +10,8 @@ add_executable(ani
 	net/http.c
 	json/json_wrap.c
 	models/model.c
+	providers/jikan.c
+	providers/mangadex.c
 )
 
 target_include_directories(ani PRIVATE
