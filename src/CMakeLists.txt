@@ -8,6 +8,7 @@ add_executable(ani
 	util/time.c
 	util/fs.c
 	net/http.c
+	json/json_wrap.c
 )
 
 target_include_directories(ani PRIVATE
