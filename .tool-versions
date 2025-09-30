@@ -1,8 +1,8 @@
-cmake --version && 
-cc --version && 
-clang --version && 
-gcc --version && 
-curl --version && 
+cmake --version &&
+cc --version &&
+clang --version &&
+gcc --version &&
+curl --version &&
 git --version
 
 cmake version 4.1.1
