@@ -6,69 +6,155 @@
 
 #include "ani/version.h"
 #include "ani/log.h"
+#include "ani/cli.h"
+#include "ani/output.h"
+#include "ani/http.h"
+#include "ani/models.h"
+#include "ani/providers/jikan.h"
+#include "ani/providers/mangadex.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <locale.h>
 
-static void
-print_version(void)
+static int
+process_query(const ani_cli_options *opts)
 {
-	printf("%s\n", ani_build_info());
-}
+	ani_result *result;
+	bool anime_success;
+	bool manga_success;
 
-static void
-print_usage(const char *prog)
-{
-	printf("Usage: %s [options] <query...>\n\n", prog);
-	printf("Options:\n");
-	printf("  -m, --manga          Query manga only\n");
-	printf("  -a, --anime          Query anime only\n");
-	printf("  -b, --both           Query both (default)\n");
-	printf("  -j, --json           Output JSON in addition to human format\n");
-	printf("  -r, --refresh        Bypass cache\n");
-	printf("  -t, --timeout <ms>   HTTP timeout override\n");
-	printf("  -v, --verbose        Verbose logs (repeat for debug: -vv)\n");
-	printf("  --official-only      Only official schedule sources\n");
-	printf("  --scrape-ok          Allow HTML parsing for official sites\n");
-	printf("  -V, --version        Print version and build info\n");
-	printf("  -h, --help           Show this help\n\n");
-	printf("Examples:\n");
-	printf("  %s One Piece\n", prog);
-	printf("  %s \"Demon Slayer\" -a\n", prog);
-	printf("  %s Berserk -m --json\n", prog);
+	if (opts == NULL || opts->query == NULL) {
+		fprintf(stderr, "Error: No query provided\n");
+		return 1;
+	}
+
+	result = ani_result_new();
+	if (result == NULL) {
+		fprintf(stderr, "Error: Failed to allocate result\n");
+		return 1;
+	}
+
+	result->query = strdup(opts->query);
+
+	/* Query anime if requested */
+	if (opts->query_both || opts->query_anime) {
+		LOG_INFO("Searching for anime: %s", opts->query);
+
+		result->anime = ani_series_new();
+		if (result->anime != NULL) {
+			anime_success = ani_jikan_search_anime(opts->query, result->anime);
+			if (anime_success) {
+				result->has_anime = true;
+			} else {
+				LOG_WARN("Anime search failed or no results");
+				ani_series_free(result->anime);
+				result->anime = NULL;
+			}
+		}
+	}
+
+	/* Query manga if requested */
+	if (opts->query_both || opts->query_manga) {
+		LOG_INFO("Searching for manga: %s", opts->query);
+
+		result->manga = ani_series_new();
+		if (result->manga != NULL) {
+			manga_success = ani_mangadex_search_manga(opts->query, result->manga);
+			if (manga_success) {
+				result->has_manga = true;
+
+				/* Get latest chapter info */
+				if (result->manga->id != NULL) {
+					ani_mangadex_get_latest_chapter(result->manga->id, result->manga);
+				}
+			} else {
+				LOG_WARN("Manga search failed or no results");
+				ani_series_free(result->manga);
+				result->manga = NULL;
+			}
+		}
+	}
+
+	/* Output results */
+	if (opts->output_json) {
+		ani_output_print_json(result);
+	} else {
+		ani_output_print_result(result);
+	}
+
+	/* Cleanup */
+	ani_result_free(result);
+
+	return 0;
 }
 
 int
 main(int argc, char **argv)
 {
+	ani_cli_options opts;
+	int ret;
+
 	/* Set locale for UTF-8 */
 	setlocale(LC_ALL, "");
 
-	/* Parse basic flags */
+	/* Initialize HTTP subsystem */
+	ani_http_init();
+
+	/* Handle no arguments - interactive mode */
 	if (argc < 2) {
-		LOG_INFO("No arguments provided. Starting interactive mode...");
 		printf("Interactive mode not yet implemented.\n");
+		printf("Try: %s --help\n", argv[0]);
+		ani_http_cleanup();
 		return 0;
 	}
 
-	/* Check for --version or -V */
-	for (int i = 1; i < argc; i++) {
-		if (strcmp(argv[i], "--version") == 0 || strcmp(argv[i], "-V") == 0) {
-			print_version();
-			return 0;
+	/* Parse arguments */
+	if (!ani_cli_parse_args(argc, argv, &opts)) {
+		/* Check for version/help flags */
+		for (int i = 1; i < argc; i++) {
+			if (strcmp(argv[i], "--version") == 0 || strcmp(argv[i], "-V") == 0) {
+				ani_cli_print_version();
+				ani_http_cleanup();
+				return 0;
+			}
+			if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
+				ani_cli_print_usage(argv[0]);
+				ani_http_cleanup();
+				return 0;
+			}
 		}
-		if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
-			print_usage(argv[0]);
-			return 0;
-		}
+
+		/* Parse error */
+		ani_cli_print_usage(argv[0]);
+		ani_http_cleanup();
+		return 1;
 	}
 
-	LOG_INFO("ani starting...");
-	LOG_DEBUG("Debug logging enabled");
+	/* Set log level based on verbosity */
+	if (opts.verbose_level == 0) {
+		ani_log_set_level(ANI_LOG_WARN);
+	} else if (opts.verbose_level == 1) {
+		ani_log_set_level(ANI_LOG_INFO);
+	} else {
+		ani_log_set_level(ANI_LOG_DEBUG);
+	}
 
-	/* Placeholder - full implementation coming */
-	printf("ani: query processing not yet implemented\n");
+	/* Require query */
+	if (opts.query == NULL) {
+		fprintf(stderr, "Error: No query provided\n");
+		ani_cli_print_usage(argv[0]);
+		ani_cli_options_free(&opts);
+		ani_http_cleanup();
+		return 1;
+	}
 
-	return 0;
+	/* Process query */
+	ret = process_query(&opts);
+
+	/* Cleanup */
+	ani_cli_options_free(&opts);
+	ani_http_cleanup();
+
+	return ret;
 }

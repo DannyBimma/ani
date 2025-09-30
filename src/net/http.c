@@ -98,7 +98,8 @@ ani_http_request_internal(const char *url, const char *method __attribute__((unu
 
 	/* Use default config if not provided */
 	if (config == NULL) {
-		ani_http_config default_config = ani_http_default_config();
+		static ani_http_config default_config;
+		default_config = ani_http_default_config();
 		config = &default_config;
 	}
 

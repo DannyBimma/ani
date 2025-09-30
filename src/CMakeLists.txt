@@ -12,6 +12,8 @@ add_executable(ani
 	models/model.c
 	providers/jikan.c
 	providers/mangadex.c
+	cli/args.c
+	cli/output.c
 )
 
 target_include_directories(ani PRIVATE
