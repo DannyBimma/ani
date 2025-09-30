@@ -7,6 +7,7 @@ add_executable(ani
 	util/str.c
 	util/time.c
 	util/fs.c
+	net/http.c
 )
 
 target_include_directories(ani PRIVATE
