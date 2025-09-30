@@ -12,9 +12,9 @@
 #include <time.h>
 
 /* Cache entry TTLs (in seconds) */
-#define ANI_CACHE_TTL_SEARCH   300    /* 5 minutes */
-#define ANI_CACHE_TTL_DETAILS  21600  /* 6 hours */
-#define ANI_CACHE_TTL_SCHEDULE 1800   /* 30 minutes */
+#define ANI_CACHE_TTL_SEARCH 300    /* 5 minutes */
+#define ANI_CACHE_TTL_DETAILS 21600 /* 6 hours */
+#define ANI_CACHE_TTL_SCHEDULE 1800 /* 30 minutes */
 
 /* Initialize cache directory */
 bool ani_cache_init(void);

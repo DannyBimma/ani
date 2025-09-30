@@ -11,10 +11,10 @@
 
 /* Log levels */
 typedef enum {
-	ANI_LOG_ERROR = 0,
-	ANI_LOG_WARN  = 1,
-	ANI_LOG_INFO  = 2,
-	ANI_LOG_DEBUG = 3
+  ANI_LOG_ERROR = 0,
+  ANI_LOG_WARN = 1,
+  ANI_LOG_INFO = 2,
+  ANI_LOG_DEBUG = 3
 } ani_log_level;
 
 /* Global log level */
@@ -31,8 +31,8 @@ void ani_log_debug(const char *fmt, ...);
 
 /* Convenience macros */
 #define LOG_ERROR(...) ani_log_error(__VA_ARGS__)
-#define LOG_WARN(...)  ani_log_warn(__VA_ARGS__)
-#define LOG_INFO(...)  ani_log_info(__VA_ARGS__)
+#define LOG_WARN(...) ani_log_warn(__VA_ARGS__)
+#define LOG_INFO(...) ani_log_info(__VA_ARGS__)
 #define LOG_DEBUG(...) ani_log_debug(__VA_ARGS__)
 
 #endif /* ANI_LOG_H */

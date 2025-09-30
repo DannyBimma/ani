@@ -7,19 +7,20 @@
 #ifndef ANI_TIME_H
 #define ANI_TIME_H
 
-#include <time.h>
 #include <stdbool.h>
+#include <time.h>
 
 /* Parsed date/time structure */
 typedef struct {
-	int year;
-	int month;   /* 1-12 */
-	int day;     /* 1-31 */
-	int hour;    /* 0-23, -1 if not present */
-	int minute;  /* 0-59, -1 if not present */
-	int second;  /* 0-59, -1 if not present */
-	int offset_minutes; /* Timezone offset in minutes from UTC, 0 if UTC/unknown */
-	bool has_time;
+  int year;
+  int month;          /* 1-12 */
+  int day;            /* 1-31 */
+  int hour;           /* 0-23, -1 if not present */
+  int minute;         /* 0-59, -1 if not present */
+  int second;         /* 0-59, -1 if not present */
+  int offset_minutes; /* Timezone offset in minutes from UTC, 0 if UTC/unknown
+                       */
+  bool has_time;
 } ani_date;
 
 /* Parse ISO-8601 date: YYYY-MM-DD or YYYY-MM-DDThh:mm:ss[Z|±hh:mm] */

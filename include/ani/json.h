@@ -33,9 +33,12 @@ bool ani_json_is_null(const ani_json_val *val);
 
 /* Object accessors */
 ani_json_val *ani_json_object_get(const ani_json_val *obj, const char *key);
-const char *ani_json_object_get_string(const ani_json_val *obj, const char *key);
-long ani_json_object_get_int(const ani_json_val *obj, const char *key, long default_val);
-bool ani_json_object_get_bool(const ani_json_val *obj, const char *key, bool default_val);
+const char *ani_json_object_get_string(const ani_json_val *obj,
+                                       const char *key);
+long ani_json_object_get_int(const ani_json_val *obj, const char *key,
+                             long default_val);
+bool ani_json_object_get_bool(const ani_json_val *obj, const char *key,
+                              bool default_val);
 
 /* Array accessors */
 size_t ani_json_array_size(const ani_json_val *arr);
@@ -47,6 +50,7 @@ long ani_json_get_int(const ani_json_val *val);
 bool ani_json_get_bool(const ani_json_val *val);
 
 /* Safe string accessor with default */
-const char *ani_json_get_string_safe(const ani_json_val *val, const char *default_val);
+const char *ani_json_get_string_safe(const ani_json_val *val,
+                                     const char *default_val);
 
 #endif /* ANI_JSON_H */

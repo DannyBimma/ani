@@ -11,16 +11,16 @@
 
 /* CLI options */
 typedef struct {
-	bool query_anime;
-	bool query_manga;
-	bool query_both;
-	bool output_json;
-	bool refresh_cache;
-	bool official_only;
-	bool scrape_ok;
-	int verbose_level;      /* 0=default, 1=info, 2=debug */
-	long timeout_ms;
-	char *query;            /* Joined query string */
+  bool query_anime;
+  bool query_manga;
+  bool query_both;
+  bool output_json;
+  bool refresh_cache;
+  bool official_only;
+  bool scrape_ok;
+  int verbose_level; /* 0=default, 1=info, 2=debug */
+  long timeout_ms;
+  char *query; /* Joined query string */
 } ani_cli_options;
 
 /* Parse command-line arguments */

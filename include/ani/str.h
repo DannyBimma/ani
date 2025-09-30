@@ -7,8 +7,8 @@
 #ifndef ANI_STR_H
 #define ANI_STR_H
 
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 /* Safe string copy (always null-terminates) */
 size_t ani_strlcpy(char *dst, const char *src, size_t size);
