@@ -6,6 +6,7 @@
 
 #include "ani/output.h"
 #include "ani/time.h"
+#include <yyjson.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -14,26 +15,27 @@ void ani_output_print_series(const ani_series *series) {
     return;
   }
 
-  /* Print section header */
+  // Print section header
   if (series->media_type == ANI_MEDIA_ANIME) {
     printf("Anime\n");
   } else {
     printf("Manga\n");
   }
 
-  /* Print titles */
+  // Print titles
   if (series->title.canonical != NULL) {
     printf("  Title:     %s\n", series->title.canonical);
   }
   if (series->title.english != NULL &&
-      series->title.english != series->title.canonical) {
+      !(series->title.canonical &&
+        strcmp(series->title.english, series->title.canonical) == 0)) {
     printf("  Title (EN): %s\n", series->title.english);
   }
   if (series->title.japanese != NULL) {
     printf("  Title (JA): %s\n", series->title.japanese);
   }
 
-  /* Print total count */
+  // Print total count
   if (series->release.total_count > 0) {
     if (series->media_type == ANI_MEDIA_ANIME) {
       printf("  Episodes:  %d\n", series->release.total_count);
@@ -48,7 +50,7 @@ void ani_output_print_series(const ani_series *series) {
     }
   }
 
-  /* Print latest release */
+  // Print latest release
   if (series->release.latest_number > 0) {
     if (series->media_type == ANI_MEDIA_ANIME) {
       printf("  Latest:    Ep %d", series->release.latest_number);
@@ -63,7 +65,7 @@ void ani_output_print_series(const ani_series *series) {
     printf("\n");
   }
 
-  /* Print next release */
+  // Print next release
   if (series->release.next_number > 0) {
     if (series->media_type == ANI_MEDIA_ANIME) {
       printf("  Next:      Ep %d", series->release.next_number);
@@ -105,80 +107,120 @@ void ani_output_print_result(const ani_result *result) {
 }
 
 void ani_output_print_json(const ani_result *result) {
-  char date_buf[64];
-
   if (result == NULL) {
     return;
   }
 
-  printf("{\n");
-  printf("  \"query\": \"%s\",\n", result->query ? result->query : "");
+  yyjson_mut_doc *doc = yyjson_mut_doc_new(NULL);
+  if (doc == NULL) {
+    return;
+  }
+  yyjson_mut_val *root = yyjson_mut_obj(doc);
+  yyjson_mut_doc_set_root(doc, root);
 
-  /* Anime section */
+  // query
+  if (result->query) {
+    yyjson_mut_obj_add_str(doc, root, "query", result->query);
+  } else {
+    yyjson_mut_obj_add_null(doc, root, "query");
+  }
+
+  // anime section
   if (result->has_anime && result->anime != NULL) {
-    ani_series *anime = result->anime;
-
-    printf("  \"anime\": {\n");
-    printf("    \"title_en\": %s,\n",
-           anime->title.english ? anime->title.english : "null");
-    printf("    \"title_ja\": %s,\n",
-           anime->title.japanese ? anime->title.japanese : "null");
-    printf("    \"total_episodes\": %d,\n",
-           anime->release.total_count > 0 ? anime->release.total_count : 0);
-
-    if (anime->release.latest_date.year > 0) {
-      ani_format_date(&anime->release.latest_date, date_buf, sizeof(date_buf));
-      printf("    \"latest\": { \"number\": %d, \"date\": \"%s\" },\n",
-             anime->release.latest_number, date_buf);
+    const ani_series *a = result->anime;
+    yyjson_mut_val *obj = yyjson_mut_obj(doc);
+    if (a->title.english) {
+      yyjson_mut_obj_add_str(doc, obj, "title_en", a->title.english);
     } else {
-      printf("    \"latest\": null,\n");
+      yyjson_mut_obj_add_null(doc, obj, "title_en");
     }
-
-    if (anime->release.next_date.year > 0) {
-      ani_format_date(&anime->release.next_date, date_buf, sizeof(date_buf));
-      printf("    \"next\": { \"number\": %d, \"date\": \"%s\" }\n",
-             anime->release.next_number, date_buf);
+    if (a->title.japanese) {
+      yyjson_mut_obj_add_str(doc, obj, "title_ja", a->title.japanese);
     } else {
-      printf("    \"next\": null\n");
+      yyjson_mut_obj_add_null(doc, obj, "title_ja");
+    }
+    if (a->release.total_count > 0) {
+      yyjson_mut_obj_add_int(doc, obj, "total_episodes", a->release.total_count);
+    } else {
+      yyjson_mut_obj_add_null(doc, obj, "total_episodes");
     }
 
-    printf("  }");
-    if (result->has_manga) {
-      printf(",");
+    if (a->release.latest_date.year > 0) {
+      char buf[64];
+      ani_format_date(&a->release.latest_date, buf, sizeof(buf));
+      yyjson_mut_val *latest = yyjson_mut_obj(doc);
+      yyjson_mut_obj_add_int(doc, latest, "number", a->release.latest_number);
+      yyjson_mut_obj_add_str(doc, latest, "date", buf);
+      yyjson_mut_obj_add(obj, yyjson_mut_str(doc, "latest"), latest);
+    } else {
+      yyjson_mut_obj_add_null(doc, obj, "latest");
     }
-    printf("\n");
+
+    if (a->release.next_date.year > 0) {
+      char buf[64];
+      ani_format_date(&a->release.next_date, buf, sizeof(buf));
+      yyjson_mut_val *next = yyjson_mut_obj(doc);
+      yyjson_mut_obj_add_int(doc, next, "number", a->release.next_number);
+      yyjson_mut_obj_add_str(doc, next, "date", buf);
+      yyjson_mut_obj_add(obj, yyjson_mut_str(doc, "next"), next);
+    } else {
+      yyjson_mut_obj_add_null(doc, obj, "next");
+    }
+
+    yyjson_mut_obj_add(root, yyjson_mut_str(doc, "anime"), obj);
   }
 
-  /* Manga section */
+  // manga section
   if (result->has_manga && result->manga != NULL) {
-    ani_series *manga = result->manga;
-
-    printf("  \"manga\": {\n");
-    printf("    \"title_en\": %s,\n",
-           manga->title.english ? manga->title.english : "null");
-    printf("    \"title_ja\": %s,\n",
-           manga->title.japanese ? manga->title.japanese : "null");
-    printf("    \"total_chapters\": %d,\n",
-           manga->release.total_count > 0 ? manga->release.total_count : 0);
-
-    if (manga->release.latest_date.year > 0) {
-      ani_format_date(&manga->release.latest_date, date_buf, sizeof(date_buf));
-      printf("    \"latest\": { \"number\": %d, \"date\": \"%s\" },\n",
-             manga->release.latest_number, date_buf);
+    const ani_series *m = result->manga;
+    yyjson_mut_val *obj = yyjson_mut_obj(doc);
+    if (m->title.english) {
+      yyjson_mut_obj_add_str(doc, obj, "title_en", m->title.english);
     } else {
-      printf("    \"latest\": null,\n");
+      yyjson_mut_obj_add_null(doc, obj, "title_en");
+    }
+    if (m->title.japanese) {
+      yyjson_mut_obj_add_str(doc, obj, "title_ja", m->title.japanese);
+    } else {
+      yyjson_mut_obj_add_null(doc, obj, "title_ja");
+    }
+    if (m->release.total_count > 0) {
+      yyjson_mut_obj_add_int(doc, obj, "total_chapters", m->release.total_count);
+    } else {
+      yyjson_mut_obj_add_null(doc, obj, "total_chapters");
     }
 
-    if (manga->release.next_date.year > 0) {
-      ani_format_date(&manga->release.next_date, date_buf, sizeof(date_buf));
-      printf("    \"next\": { \"number\": %d, \"date\": \"%s\" }\n",
-             manga->release.next_number, date_buf);
+    if (m->release.latest_date.year > 0) {
+      char buf[64];
+      ani_format_date(&m->release.latest_date, buf, sizeof(buf));
+      yyjson_mut_val *latest = yyjson_mut_obj(doc);
+      yyjson_mut_obj_add_int(doc, latest, "number", m->release.latest_number);
+      yyjson_mut_obj_add_str(doc, latest, "date", buf);
+      yyjson_mut_obj_add(obj, yyjson_mut_str(doc, "latest"), latest);
     } else {
-      printf("    \"next\": null\n");
+      yyjson_mut_obj_add_null(doc, obj, "latest");
     }
 
-    printf("  }\n");
+    if (m->release.next_date.year > 0) {
+      char buf[64];
+      ani_format_date(&m->release.next_date, buf, sizeof(buf));
+      yyjson_mut_val *next = yyjson_mut_obj(doc);
+      yyjson_mut_obj_add_int(doc, next, "number", m->release.next_number);
+      yyjson_mut_obj_add_str(doc, next, "date", buf);
+      yyjson_mut_obj_add(obj, yyjson_mut_str(doc, "next"), next);
+    } else {
+      yyjson_mut_obj_add_null(doc, obj, "next");
+    }
+
+    yyjson_mut_obj_add(root, yyjson_mut_str(doc, "manga"), obj);
   }
 
-  printf("}\n");
+  // Write and print
+  yyjson_write_err werr;
+  char *json = yyjson_mut_write_opts(doc, YYJSON_WRITE_PRETTY, NULL, NULL, &werr);
+  if (json) {
+    printf("%s\n", json);
+    free(json);
+  }
+  yyjson_mut_doc_free(doc);
 }

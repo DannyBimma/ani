@@ -76,10 +76,10 @@ void ani_title_set(ani_title *title, const char *english, const char *japanese,
     return;
   }
 
-  /* Free existing */
+  // Free existing
   ani_title_free(title);
 
-  /* Set new */
+  // Set new
   if (english != NULL) {
     title->english = ani_strdup(english);
   }

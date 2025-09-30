@@ -23,7 +23,7 @@ char *ani_get_cache_dir(void) {
   char *cache_dir;
 
 #ifdef _WIN32
-  /* Windows: %LOCALAPPDATA%\ani\Cache */
+  // Windows: %LOCALAPPDATA%\ani\Cache
   base = getenv("LOCALAPPDATA");
   if (base == NULL) {
     base = getenv("APPDATA");
@@ -39,7 +39,7 @@ char *ani_get_cache_dir(void) {
   }
   return NULL;
 #elif defined(__APPLE__)
-  /* macOS: ~/Library/Caches/ani */
+  // macOS: ~/Library/Caches/ani
   base = getenv("HOME");
   if (base == NULL) {
     return NULL;
@@ -56,7 +56,7 @@ char *ani_get_cache_dir(void) {
   }
   return NULL;
 #else
-  /* Linux: $XDG_CACHE_HOME/ani or ~/.cache/ani */
+  // Linux: $XDG_CACHE_HOME/ani or ~/.cache/ani
   base = getenv("XDG_CACHE_HOME");
   if (base != NULL && base[0] != '\0') {
     return ani_path_join(base, "ani");
@@ -85,18 +85,18 @@ bool ani_mkdir_p(const char *path) {
     return false;
   }
 
-  /* Check if already exists */
+  // Check if already exists
   if (stat(path, &st) == 0) {
     return S_ISDIR(st.st_mode);
   }
 
-  /* Create a mutable copy */
+  // Create a mutable copy
   copy = ani_strdup(path);
   if (copy == NULL) {
     return false;
   }
 
-  /* Create parent directories */
+  // Create parent directories
   p = copy;
   if (*p == '/') {
     p++;
@@ -121,7 +121,7 @@ bool ani_mkdir_p(const char *path) {
     p++;
   }
 
-  /* Create final directory */
+  // Create final directory
   if (mkdir(copy, 0755) != 0 && errno != EEXIST) {
     free(copy);
     return false;
@@ -129,11 +129,6 @@ bool ani_mkdir_p(const char *path) {
 
   free(copy);
   return true;
-}
-
-bool ani_file_exists(const char *path) {
-  struct stat st;
-  return stat(path, &st) == 0;
 }
 
 char *ani_path_join(const char *base, const char *name) {
@@ -150,7 +145,7 @@ char *ani_path_join(const char *base, const char *name) {
   base_len = strlen(base);
   name_len = strlen(name);
 
-  /* Check if we need a separator */
+  // Check if we need a separator
   needs_sep =
       base_len > 0 && base[base_len - 1] != '/' && base[base_len - 1] != '\\';
 

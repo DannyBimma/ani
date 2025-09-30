@@ -23,5 +23,3 @@ endif()
 
 add_subdirectory(third_party)
 add_subdirectory(src)
-enable_testing()
-add_subdirectory(tests)

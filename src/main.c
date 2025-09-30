@@ -37,7 +37,7 @@ static int process_query(const ani_cli_options *opts) {
 
   result->query = strdup(opts->query);
 
-  /* Query anime if requested */
+  // Query anime if requested
   if (opts->query_both || opts->query_anime) {
     LOG_INFO("Searching for anime: %s", opts->query);
 
@@ -47,7 +47,7 @@ static int process_query(const ani_cli_options *opts) {
       if (anime_success) {
         result->has_anime = true;
 
-        /* Get next episode schedule from AniList */
+        // Get next episode schedule from AniList
         if (result->anime->id != NULL) {
           ani_anilist_get_next_episode(result->anime->id, result->anime);
         }
@@ -59,7 +59,7 @@ static int process_query(const ani_cli_options *opts) {
     }
   }
 
-  /* Query manga if requested */
+  // Query manga if requested
   if (opts->query_both || opts->query_manga) {
     LOG_INFO("Searching for manga: %s", opts->query);
 
@@ -69,7 +69,7 @@ static int process_query(const ani_cli_options *opts) {
       if (manga_success) {
         result->has_manga = true;
 
-        /* Get latest chapter info */
+        // Get latest chapter info
         if (result->manga->id != NULL) {
           ani_mangadex_get_latest_chapter(result->manga->id, result->manga);
         }
@@ -81,14 +81,14 @@ static int process_query(const ani_cli_options *opts) {
     }
   }
 
-  /* Output results */
+  // Output results
   if (opts->output_json) {
     ani_output_print_json(result);
   } else {
     ani_output_print_result(result);
   }
 
-  /* Cleanup */
+  // Cleanup
   ani_result_free(result);
 
   return 0;
@@ -98,16 +98,16 @@ int main(int argc, char **argv) {
   ani_cli_options opts;
   int ret;
 
-  /* Set locale for UTF-8 */
+  // Set locale for UTF-8
   setlocale(LC_ALL, "");
 
-  /* Initialize HTTP subsystem */
+  // Initialize HTTP subsystem
   ani_http_init();
 
-  /* Initialize cache */
+  // Initialize cache
   ani_cache_init();
 
-  /* Handle no arguments - interactive mode */
+  // Handle no arguments - interactive mode
   if (argc < 2) {
     printf("Interactive mode not yet implemented.\n");
     printf("Try: %s --help\n", argv[0]);
@@ -115,9 +115,9 @@ int main(int argc, char **argv) {
     return 0;
   }
 
-  /* Parse arguments */
+  // Parse arguments
   if (!ani_cli_parse_args(argc, argv, &opts)) {
-    /* Check for version/help flags */
+    // Check for version/help flags
     for (int i = 1; i < argc; i++) {
       if (strcmp(argv[i], "--version") == 0 || strcmp(argv[i], "-V") == 0) {
         ani_cli_print_version();
@@ -131,13 +131,13 @@ int main(int argc, char **argv) {
       }
     }
 
-    /* Parse error */
+    // Parse error
     ani_cli_print_usage(argv[0]);
     ani_http_cleanup();
     return 1;
   }
 
-  /* Set log level based on verbosity */
+  // Set log level based on verbosity
   if (opts.verbose_level == 0) {
     ani_log_set_level(ANI_LOG_WARN);
   } else if (opts.verbose_level == 1) {
@@ -146,7 +146,7 @@ int main(int argc, char **argv) {
     ani_log_set_level(ANI_LOG_DEBUG);
   }
 
-  /* Require query */
+  // Require query
   if (opts.query == NULL) {
     fprintf(stderr, "Error: No query provided\n");
     ani_cli_print_usage(argv[0]);
@@ -155,10 +155,10 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  /* Process query */
+  // Process query
   ret = process_query(&opts);
 
-  /* Cleanup */
+  // Cleanup
   ani_cli_options_free(&opts);
   ani_http_cleanup();
 

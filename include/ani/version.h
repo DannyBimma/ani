@@ -15,4 +15,4 @@
 const char *ani_version(void);
 const char *ani_build_info(void);
 
-#endif /* ANI_VERSION_H */
+#endif // ANI_VERSION_H

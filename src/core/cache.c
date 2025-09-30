@@ -17,7 +17,7 @@ static char *cache_dir = NULL;
 
 bool ani_cache_init(void) {
   if (cache_dir != NULL) {
-    return true; /* Already initialized */
+    return true; // Already initialized
   }
 
   cache_dir = ani_get_cache_dir();
@@ -26,7 +26,7 @@ bool ani_cache_init(void) {
     return false;
   }
 
-  /* Create cache directory if it doesn't exist */
+  // Create cache directory if it doesn't exist
   if (!ani_mkdir_p(cache_dir)) {
     LOG_WARN("Failed to create cache directory: %s", cache_dir);
     free(cache_dir);
@@ -46,7 +46,7 @@ static char *get_cache_path(const char *provider, const char *key) {
     return NULL;
   }
 
-  /* Simple filename: provider_key.json */
+  // Simple filename: provider_key.json
   snprintf(filename, sizeof(filename), "%s_%s.json", provider, key);
 
   path = ani_path_join(cache_dir, filename);
@@ -68,13 +68,13 @@ char *ani_cache_get(const char *provider, const char *key, time_t max_age) {
     return NULL;
   }
 
-  /* Check if file exists and get stats */
+  // Check if file exists and get stats
   if (stat(path, &st) != 0) {
     free(path);
-    return NULL; /* File doesn't exist */
+    return NULL; // File doesn't exist
   }
 
-  /* Check age */
+  // Check age
   now = time(NULL);
   age = now - st.st_mtime;
   if (age > max_age) {
@@ -83,7 +83,7 @@ char *ani_cache_get(const char *provider, const char *key, time_t max_age) {
     return NULL;
   }
 
-  /* Read file */
+  // Read file
   f = fopen(path, "r");
   free(path);
 
@@ -146,6 +146,6 @@ bool ani_cache_set(const char *provider, const char *key, const char *data) {
 }
 
 void ani_cache_clear(void) {
-  /* TODO: Implement cache clearing */
+  // TODO: Implement cache clearing
   LOG_INFO("Cache clear not yet implemented");
 }

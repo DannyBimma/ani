@@ -10,10 +10,7 @@
 #include "ani/models.h"
 #include <stdbool.h>
 
-/* Search for anime by query and populate series info */
+// Search for anime by query and populate series info
 bool ani_jikan_search_anime(const char *query, ani_series *series);
 
-/* Get full anime details by MAL ID */
-bool ani_jikan_get_anime_details(const char *mal_id, ani_series *series);
-
-#endif /* ANI_JIKAN_H */
+#endif // ANI_JIKAN_H

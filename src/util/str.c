@@ -45,7 +45,7 @@ size_t ani_strlcat(char *dst, const char *src, size_t size) {
 char *ani_str_trim(char *str) {
   char *end;
 
-  /* Trim leading space */
+  // Trim leading space
   while (isspace((unsigned char)*str)) {
     str++;
   }
@@ -54,7 +54,7 @@ char *ani_str_trim(char *str) {
     return str;
   }
 
-  /* Trim trailing space */
+  // Trim trailing space
   end = str + strlen(str) - 1;
   while (end > str && isspace((unsigned char)*end)) {
     end--;

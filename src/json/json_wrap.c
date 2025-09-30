@@ -10,12 +10,12 @@
 #include <string.h>
 #include <yyjson.h>
 
-/* Internal document structure */
+// Internal document structure
 struct ani_json_doc {
   yyjson_doc *doc;
 };
 
-/* Internal value structure (just wraps yyjson_val) */
+// Internal value structure (just wraps yyjson_val)
 struct ani_json_val {
   yyjson_val *val;
 };

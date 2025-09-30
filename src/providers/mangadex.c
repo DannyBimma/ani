@@ -22,7 +22,7 @@
 #define MANGADEX_AGGREGATE_URL                                                 \
   MANGADEX_BASE_URL "/manga/%s/aggregate?translatedLanguage[]=en"
 
-/* URL encode helper (same as jikan.c) */
+// URL encode helper (same as jikan.c)
 static char *url_encode(const char *str) {
   size_t len;
   size_t i;
@@ -61,7 +61,7 @@ static char *url_encode(const char *str) {
   return encoded;
 }
 
-/* Parse manga titles from JSON */
+// Parse manga titles from JSON
 static void parse_titles(ani_json_val *manga_obj, ani_series *series) {
   ani_json_val *attributes;
   ani_json_val *title_obj;
@@ -84,22 +84,22 @@ static void parse_titles(ani_json_val *manga_obj, ani_series *series) {
   japanese = NULL;
   canonical = NULL;
 
-  /* Get main title */
+  // Get main title
   title_obj = ani_json_object_get(attributes, "title");
   if (title_obj != NULL) {
-    /* Try en first */
+    // Try en first
     canonical = ani_json_object_get_string(title_obj, "en");
     if (canonical == NULL) {
-      /* Try ja-ro (romaji) */
+      // Try ja-ro (romaji)
       canonical = ani_json_object_get_string(title_obj, "ja-ro");
     }
     if (canonical == NULL) {
-      /* Try ja */
+      // Try ja
       canonical = ani_json_object_get_string(title_obj, "ja");
     }
   }
 
-  /* Search altTitles for English/Japanese */
+  // Search altTitles for English/Japanese
   alt_titles = ani_json_object_get(attributes, "altTitles");
   if (alt_titles != NULL && ani_json_is_array(alt_titles)) {
     size_t count = ani_json_array_size(alt_titles);
@@ -118,7 +118,7 @@ static void parse_titles(ani_json_val *manga_obj, ani_series *series) {
     }
   }
 
-  /* Fallback: use canonical as English if not found */
+  // Fallback: use canonical as English if not found
   if (english == NULL) {
     english = canonical;
   }
@@ -141,19 +141,19 @@ bool ani_mangadex_search_manga(const char *query, ani_series *series) {
     return false;
   }
 
-  /* URL encode query */
+  // URL encode query
   encoded_query = url_encode(query);
   if (encoded_query == NULL) {
     return false;
   }
 
-  /* Build search URL */
+  // Build search URL
   snprintf(url, sizeof(url), MANGADEX_SEARCH_URL, encoded_query);
   free(encoded_query);
 
   LOG_DEBUG("MangaDex search: %s", url);
 
-  /* Make HTTP request */
+  // Make HTTP request
   resp = ani_http_get(url, NULL);
   if (resp == NULL || resp->status_code != 200) {
     LOG_ERROR("MangaDex search failed: HTTP %ld", resp ? resp->status_code : 0);
@@ -161,7 +161,7 @@ bool ani_mangadex_search_manga(const char *query, ani_series *series) {
     return false;
   }
 
-  /* Parse JSON */
+  // Parse JSON
   doc = ani_json_parse(resp->body, resp->body_len);
   ani_http_response_free(resp);
 
@@ -176,14 +176,14 @@ bool ani_mangadex_search_manga(const char *query, ani_series *series) {
     if (data_array != NULL && ani_json_array_size(data_array) > 0) {
       manga_obj = ani_json_array_get(data_array, 0);
       if (manga_obj != NULL) {
-        /* Get manga ID */
+        // Get manga ID
         id_val = ani_json_object_get(manga_obj, "id");
         if (id_val != NULL) {
           const char *id = ani_json_get_string(id_val);
           if (id != NULL) {
             series->id = ani_strdup(id);
 
-            /* Parse titles */
+            // Parse titles
             parse_titles(manga_obj, series);
 
             series->media_type = ANI_MEDIA_MANGA;
@@ -220,12 +220,12 @@ bool ani_mangadex_get_latest_chapter(const char *manga_id, ani_series *series) {
     return false;
   }
 
-  /* Build chapter URL */
+  // Build chapter URL
   snprintf(url, sizeof(url), MANGADEX_CHAPTER_URL, manga_id);
 
   LOG_DEBUG("MangaDex latest chapter: %s", url);
 
-  /* Make HTTP request */
+  // Make HTTP request
   resp = ani_http_get(url, NULL);
   if (resp == NULL || resp->status_code != 200) {
     LOG_WARN("MangaDex chapter query failed: HTTP %ld",
@@ -234,7 +234,7 @@ bool ani_mangadex_get_latest_chapter(const char *manga_id, ani_series *series) {
     return false;
   }
 
-  /* Parse JSON */
+  // Parse JSON
   doc = ani_json_parse(resp->body, resp->body_len);
   ani_http_response_free(resp);
 
@@ -251,13 +251,13 @@ bool ani_mangadex_get_latest_chapter(const char *manga_id, ani_series *series) {
       if (chapter_obj != NULL) {
         attributes = ani_json_object_get(chapter_obj, "attributes");
         if (attributes != NULL) {
-          /* Get chapter number */
+          // Get chapter number
           chapter_num_str = ani_json_object_get_string(attributes, "chapter");
           if (chapter_num_str != NULL) {
             series->release.latest_number = atoi(chapter_num_str);
           }
 
-          /* Get publish date */
+          // Get publish date
           publish_date_str =
               ani_json_object_get_string(attributes, "publishAt");
           if (publish_date_str != NULL) {

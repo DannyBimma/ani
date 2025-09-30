@@ -20,7 +20,7 @@ void ani_cli_print_usage(const char *prog) {
   printf("  -m, --manga          Query manga only\n");
   printf("  -a, --anime          Query anime only\n");
   printf("  -b, --both           Query both (default)\n");
-  printf("  -j, --json           Output JSON in addition to human format\n");
+  printf("  -j, --json           Output JSON (instead of human format)\n");
   printf("  -r, --refresh        Bypass cache\n");
   printf("  -t, --timeout <ms>   HTTP timeout override\n");
   printf("  -v, --verbose        Verbose logs (repeat for debug: -vv)\n");
@@ -44,12 +44,12 @@ bool ani_cli_parse_args(int argc, char **argv, ani_cli_options *opts) {
     return false;
   }
 
-  /* Initialize defaults */
+  // Initialize defaults
   memset(opts, 0, sizeof(*opts));
   opts->query_both = true;
   opts->timeout_ms = -1;
 
-  /* Parse flags */
+  // Parse flags
   query_start = -1;
   for (i = 1; i < argc; i++) {
     if (strcmp(argv[i], "-m") == 0 || strcmp(argv[i], "--manga") == 0) {
@@ -82,21 +82,21 @@ bool ani_cli_parse_args(int argc, char **argv, ani_cli_options *opts) {
       }
       opts->timeout_ms = atol(argv[++i]);
     } else if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
-      return false; /* Let caller handle help */
+      return false; // Let caller handle help
     } else if (strcmp(argv[i], "-V") == 0 ||
                strcmp(argv[i], "--version") == 0) {
-      return false; /* Let caller handle version */
+      return false; // Let caller handle version
     } else if (argv[i][0] == '-') {
       fprintf(stderr, "Error: Unknown option: %s\n", argv[i]);
       return false;
     } else {
-      /* Start of query */
+      // Start of query
       query_start = i;
       break;
     }
   }
 
-  /* Join query parts */
+  // Join query parts
   if (query_start >= 0) {
     query_count = argc - query_start;
     query_parts = malloc(sizeof(char *) * (size_t)query_count);

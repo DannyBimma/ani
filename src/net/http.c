@@ -10,9 +10,13 @@
 #include <curl/curl.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <unistd.h>
+#endif
 
-/* Buffer for accumulating response data */
+// Buffer for accumulating response data
 typedef struct {
   char *data;
   size_t size;
@@ -28,7 +32,7 @@ static size_t write_callback(void *contents, size_t size, size_t nmemb,
   realsize = size * nmemb;
   buf = (ani_http_buffer *)userp;
 
-  /* Grow buffer if needed */
+  // Grow buffer if needed
   if (buf->size + realsize + 1 > buf->capacity) {
     size_t new_capacity = buf->capacity * 2;
     if (new_capacity < buf->size + realsize + 1) {
@@ -85,14 +89,14 @@ ani_http_request_internal(const char *url,
     return NULL;
   }
 
-  /* Use default config if not provided */
+  // Use default config if not provided
   if (config == NULL) {
     static ani_http_config default_config;
     default_config = ani_http_default_config();
     config = &default_config;
   }
 
-  /* Initialize response buffer */
+  // Initialize response buffer
   buf.capacity = 4096;
   buf.data = malloc(buf.capacity);
   buf.size = 0;
@@ -101,7 +105,7 @@ ani_http_request_internal(const char *url,
   }
   buf.data[0] = '\0';
 
-  /* Create response structure */
+  // Create response structure
   resp = calloc(1, sizeof(*resp));
   if (resp == NULL) {
     free(buf.data);
@@ -115,34 +119,34 @@ ani_http_request_internal(const char *url,
     return NULL;
   }
 
-  /* Set URL */
+  // Set URL
   curl_easy_setopt(curl, CURLOPT_URL, url);
 
-  /* Set timeouts */
+  // Set timeouts
   curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, config->connect_timeout_ms);
   curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, config->timeout_ms);
 
-  /* Set User-Agent */
+  // Set User-Agent
   if (config->user_agent != NULL) {
     curl_easy_setopt(curl, CURLOPT_USERAGENT, config->user_agent);
   }
 
-  /* SSL verification */
+  // SSL verification
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, config->verify_ssl ? 1L : 0L);
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, config->verify_ssl ? 2L : 0L);
 
-  /* Enable compression */
+  // Enable compression
   curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
 
-  /* Follow redirects */
+  // Follow redirects
   curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
   curl_easy_setopt(curl, CURLOPT_MAXREDIRS, 5L);
 
-  /* Set write callback */
+  // Set write callback
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buf);
 
-  /* Set method and body for POST */
+  // Set method and body for POST
   headers = NULL;
   if (post_body != NULL) {
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_body);
@@ -156,40 +160,50 @@ ani_http_request_internal(const char *url,
     }
   }
 
-  /* Retry loop */
+  // Retry loop
   for (retry = 0; retry <= config->max_retries; retry++) {
     if (retry > 0) {
       LOG_DEBUG("Retrying request (attempt %d/%d): %s", retry + 1,
                 config->max_retries + 1, url);
-      sleep((unsigned int)(1 << (retry - 1))); /* Exponential backoff */
+      // Exponential backoff (cross-platform)
+#ifdef _WIN32
+      Sleep((DWORD)(1000U * (1U << (retry - 1))));
+#else
+      sleep((unsigned int)(1U << (retry - 1)));
+#endif
     }
 
-    /* Reset buffer for retry */
+    // Reset buffer for retry
     buf.size = 0;
     buf.data[0] = '\0';
 
-    /* Perform request */
+    // Perform request
     res = curl_easy_perform(curl);
 
     if (res != CURLE_OK) {
       LOG_ERROR("curl_easy_perform() failed: %s", curl_easy_strerror(res));
       resp->error = ani_strdup(curl_easy_strerror(res));
-      continue; /* Retry */
+      continue; // Retry
     }
 
-    /* Get status code */
+    // Get status code
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &resp->status_code);
 
     LOG_DEBUG("HTTP %ld %s", resp->status_code, url);
 
-    /* Check for rate limit (429) or server error (5xx) */
+    // Check for rate limit (429) or server error (5xx)
     if (resp->status_code == 429 || resp->status_code >= 500) {
-      /* Check for Retry-After header */
+      // Check for Retry-After header
       retry_after = 0;
       curl_easy_getinfo(curl, CURLINFO_RETRY_AFTER, &retry_after);
       if (retry_after > 0 && retry_after < 60) {
         LOG_WARN("Rate limited, waiting %ld seconds", retry_after);
+        // Cross-platform sleep
+#ifdef _WIN32
+        Sleep((DWORD)(retry_after * 1000));
+#else
         sleep((unsigned int)retry_after);
+#endif
       }
 
       if (retry < config->max_retries) {
@@ -198,17 +212,17 @@ ani_http_request_internal(const char *url,
       }
     }
 
-    /* Success */
+    // Success
     break;
   }
 
-  /* Cleanup */
+  // Cleanup
   if (headers != NULL) {
     curl_slist_free_all(headers);
   }
   curl_easy_cleanup(curl);
 
-  /* Set response body */
+  // Set response body
   resp->body = buf.data;
   resp->body_len = buf.size;
 

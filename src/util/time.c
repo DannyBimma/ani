@@ -27,24 +27,24 @@ bool ani_parse_iso8601(const char *str, ani_date *out) {
   out->offset_minutes = 0;
   out->has_time = false;
 
-  /* Try YYYY-MM-DD format first */
+  // Try YYYY-MM-DD format first
   n = sscanf(str, "%d-%d-%d", &out->year, &out->month, &out->day);
   if (n == 3) {
-    /* Validate date */
+    // Validate date
     if (out->year < 1900 || out->year > 2100 || out->month < 1 ||
         out->month > 12 || out->day < 1 || out->day > 31) {
       return false;
     }
 
-    /* Check for time component */
+    // Check for time component
     const char *t_pos = strchr(str, 'T');
     if (t_pos == NULL) {
       return true;
     }
 
-    t_pos++; /* Skip 'T' */
+    t_pos++; // Skip 'T'
 
-    /* Parse time: hh:mm:ss */
+    // Parse time: hh:mm:ss
     n = sscanf(t_pos, "%d:%d:%d", &out->hour, &out->minute, &out->second);
     if (n >= 2) {
       out->has_time = true;
@@ -52,13 +52,13 @@ bool ani_parse_iso8601(const char *str, ani_date *out) {
         out->second = 0;
       }
 
-      /* Validate time */
+      // Validate time
       if (out->hour < 0 || out->hour > 23 || out->minute < 0 ||
           out->minute > 59 || out->second < 0 || out->second > 59) {
         return false;
       }
 
-      /* Check for timezone */
+      // Check for timezone
       const char *tz_pos = strpbrk(t_pos, "Zz+-");
       if (tz_pos != NULL) {
         if (*tz_pos == 'Z' || *tz_pos == 'z') {
@@ -105,7 +105,7 @@ bool ani_parse_unix_timestamp(long timestamp, ani_date *out) {
   out->hour = tm_info->tm_hour;
   out->minute = tm_info->tm_min;
   out->second = tm_info->tm_sec;
-  out->offset_minutes = 0; /* UTC */
+  out->offset_minutes = 0; // UTC
   out->has_time = true;
 
   return true;

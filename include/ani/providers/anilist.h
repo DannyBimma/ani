@@ -10,7 +10,7 @@
 #include "ani/models.h"
 #include <stdbool.h>
 
-/* Get next airing episode info using MAL ID */
+// Get next airing episode info using MAL ID
 bool ani_anilist_get_next_episode(const char *mal_id, ani_series *series);
 
-#endif /* ANI_ANILIST_H */
+#endif // ANI_ANILIST_H
