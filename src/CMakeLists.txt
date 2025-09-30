@@ -9,6 +9,7 @@ add_executable(ani
 	util/fs.c
 	net/http.c
 	json/json_wrap.c
+	models/model.c
 )
 
 target_include_directories(ani PRIVATE
