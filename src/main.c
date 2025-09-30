@@ -9,6 +9,7 @@
 #include "ani/cli.h"
 #include "ani/output.h"
 #include "ani/http.h"
+#include "ani/cache.h"
 #include "ani/models.h"
 #include "ani/providers/jikan.h"
 #include "ani/providers/anilist.h"
@@ -106,6 +107,9 @@ main(int argc, char **argv)
 
 	/* Initialize HTTP subsystem */
 	ani_http_init();
+
+	/* Initialize cache */
+	ani_cache_init();
 
 	/* Handle no arguments - interactive mode */
 	if (argc < 2) {

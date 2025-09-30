@@ -10,6 +10,7 @@ add_executable(ani
 	net/http.c
 	json/json_wrap.c
 	models/model.c
+	core/cache.c
 	providers/jikan.c
 	providers/anilist.c
 	providers/mangadex.c
