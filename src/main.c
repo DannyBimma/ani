@@ -26,12 +26,14 @@ static int process_query(const ani_cli_options *opts) {
 
   if (opts == NULL || opts->query == NULL) {
     fprintf(stderr, "Error: No query provided\n");
+
     return 1;
   }
 
   result = ani_result_new();
   if (result == NULL) {
     fprintf(stderr, "Error: Failed to allocate result\n");
+
     return 1;
   }
 
@@ -101,10 +103,10 @@ int main(int argc, char **argv) {
   // Set locale for UTF-8
   setlocale(LC_ALL, "");
 
-  // Initialize HTTP subsystem
+  // Init HTTP subsystem
   ani_http_init();
 
-  // Initialize cache
+  // Init cache
   ani_cache_init();
 
   // Handle no arguments - interactive mode
@@ -112,6 +114,7 @@ int main(int argc, char **argv) {
     printf("Interactive mode not yet implemented.\n");
     printf("Try: %s --help\n", argv[0]);
     ani_http_cleanup();
+
     return 0;
   }
 
@@ -122,11 +125,13 @@ int main(int argc, char **argv) {
       if (strcmp(argv[i], "--version") == 0 || strcmp(argv[i], "-V") == 0) {
         ani_cli_print_version();
         ani_http_cleanup();
+
         return 0;
       }
       if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
         ani_cli_print_usage(argv[0]);
         ani_http_cleanup();
+
         return 0;
       }
     }
@@ -134,6 +139,7 @@ int main(int argc, char **argv) {
     // Parse error
     ani_cli_print_usage(argv[0]);
     ani_http_cleanup();
+
     return 1;
   }
 
@@ -152,6 +158,7 @@ int main(int argc, char **argv) {
     ani_cli_print_usage(argv[0]);
     ani_cli_options_free(&opts);
     ani_http_cleanup();
+
     return 1;
   }
 
