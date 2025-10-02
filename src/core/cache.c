@@ -17,12 +17,13 @@ static char *cache_dir = NULL;
 
 bool ani_cache_init(void) {
   if (cache_dir != NULL) {
-    return true; // Already initialized
+    return true; // Already initted
   }
 
   cache_dir = ani_get_cache_dir();
   if (cache_dir == NULL) {
     LOG_WARN("Failed to get cache directory");
+
     return false;
   }
 
@@ -31,6 +32,7 @@ bool ani_cache_init(void) {
     LOG_WARN("Failed to create cache directory: %s", cache_dir);
     free(cache_dir);
     cache_dir = NULL;
+
     return false;
   }
 
@@ -71,6 +73,7 @@ char *ani_cache_get(const char *provider, const char *key, time_t max_age) {
   // Check if file exists and get stats
   if (stat(path, &st) != 0) {
     free(path);
+
     return NULL; // File doesn't exist
   }
 
@@ -80,6 +83,7 @@ char *ani_cache_get(const char *provider, const char *key, time_t max_age) {
   if (age > max_age) {
     LOG_DEBUG("Cache expired for %s/%s (age: %ld sec)", provider, key, age);
     free(path);
+
     return NULL;
   }
 
@@ -95,6 +99,7 @@ char *ani_cache_get(const char *provider, const char *key, time_t max_age) {
   data = malloc(file_size + 1);
   if (data == NULL) {
     fclose(f);
+
     return NULL;
   }
 
@@ -103,11 +108,13 @@ char *ani_cache_get(const char *provider, const char *key, time_t max_age) {
 
   if (read_size != file_size) {
     free(data);
+
     return NULL;
   }
 
   data[file_size] = '\0';
   LOG_DEBUG("Cache hit for %s/%s", provider, key);
+
   return data;
 }
 
@@ -147,5 +154,5 @@ bool ani_cache_set(const char *provider, const char *key, const char *data) {
 
 void ani_cache_clear(void) {
   // TODO: Implement cache clearing
-  LOG_INFO("Cache clear not yet implemented");
+  LOG_INFO("Still not yet implemented...");
 }
