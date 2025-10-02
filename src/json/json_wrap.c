@@ -37,6 +37,7 @@ ani_json_doc *ani_json_parse(const char *json_str, size_t len) {
   if (doc->doc == NULL) {
     LOG_ERROR("JSON parse error: %s (at position %zu)", err.msg, err.pos);
     free(doc);
+
     return NULL;
   }
 
