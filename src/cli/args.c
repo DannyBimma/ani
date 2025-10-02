@@ -44,7 +44,7 @@ bool ani_cli_parse_args(int argc, char **argv, ani_cli_options *opts) {
     return false;
   }
 
-  // Initialize defaults
+  // Init defaults
   memset(opts, 0, sizeof(*opts));
   opts->query_both = true;
   opts->timeout_ms = -1;
@@ -78,6 +78,7 @@ bool ani_cli_parse_args(int argc, char **argv, ani_cli_options *opts) {
                strcmp(argv[i], "--timeout") == 0) {
       if (i + 1 >= argc) {
         fprintf(stderr, "Error: --timeout requires an argument\n");
+
         return false;
       }
       opts->timeout_ms = atol(argv[++i]);

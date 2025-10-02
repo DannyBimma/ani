@@ -106,6 +106,12 @@ Troubleshooting
 - If Windows build errors mention `sleep`, this repo implements Windows-compatible backoff using `Sleep()`; ensure you are compiling with the correct Windows headers (MSVC or MinGW).
 - Network requests require internet and may be rate-limited; retry later or run with `-v`/`-vv` to see logs.
 
+Editor Integration (clangd/VS Code)
+
+- The build exports `compile_commands.json` and the Makefile symlinks it to the project root.
+- If your editor shows header-not-found errors like `ani/cache.h file not found`, build once (`make` or `make debug`) so the database exists.
+- With clangd, the included `.clangd` points to `build/` automatically. If you use a different build dir, update `.clangd` or invoke clangd with `--compile-commands-dir`.
+
 License
 
 - See LICENSE for details.
