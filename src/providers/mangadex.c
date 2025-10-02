@@ -158,6 +158,7 @@ bool ani_mangadex_search_manga(const char *query, ani_series *series) {
   if (resp == NULL || resp->status_code != 200) {
     LOG_ERROR("MangaDex search failed: HTTP %ld", resp ? resp->status_code : 0);
     ani_http_response_free(resp);
+
     return false;
   }
 
