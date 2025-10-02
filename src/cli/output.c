@@ -6,9 +6,9 @@
 
 #include "ani/output.h"
 #include "ani/time.h"
-#include <yyjson.h>
 #include <stdio.h>
 #include <string.h>
+#include <yyjson.h>
 
 void ani_output_print_series(const ani_series *series) {
   if (series == NULL) {
@@ -118,14 +118,14 @@ void ani_output_print_json(const ani_result *result) {
   yyjson_mut_val *root = yyjson_mut_obj(doc);
   yyjson_mut_doc_set_root(doc, root);
 
-  // query
+  // Query
   if (result->query) {
     yyjson_mut_obj_add_str(doc, root, "query", result->query);
   } else {
     yyjson_mut_obj_add_null(doc, root, "query");
   }
 
-  // anime section
+  // Anime section
   if (result->has_anime && result->anime != NULL) {
     const ani_series *a = result->anime;
     yyjson_mut_val *obj = yyjson_mut_obj(doc);
@@ -140,7 +140,8 @@ void ani_output_print_json(const ani_result *result) {
       yyjson_mut_obj_add_null(doc, obj, "title_ja");
     }
     if (a->release.total_count > 0) {
-      yyjson_mut_obj_add_int(doc, obj, "total_episodes", a->release.total_count);
+      yyjson_mut_obj_add_int(doc, obj, "total_episodes",
+                             a->release.total_count);
     } else {
       yyjson_mut_obj_add_null(doc, obj, "total_episodes");
     }
@@ -170,7 +171,7 @@ void ani_output_print_json(const ani_result *result) {
     yyjson_mut_obj_add(root, yyjson_mut_str(doc, "anime"), obj);
   }
 
-  // manga section
+  // Manga section
   if (result->has_manga && result->manga != NULL) {
     const ani_series *m = result->manga;
     yyjson_mut_val *obj = yyjson_mut_obj(doc);
@@ -185,7 +186,8 @@ void ani_output_print_json(const ani_result *result) {
       yyjson_mut_obj_add_null(doc, obj, "title_ja");
     }
     if (m->release.total_count > 0) {
-      yyjson_mut_obj_add_int(doc, obj, "total_chapters", m->release.total_count);
+      yyjson_mut_obj_add_int(doc, obj, "total_chapters",
+                             m->release.total_count);
     } else {
       yyjson_mut_obj_add_null(doc, obj, "total_chapters");
     }
@@ -217,7 +219,8 @@ void ani_output_print_json(const ani_result *result) {
 
   // Write and print
   yyjson_write_err werr;
-  char *json = yyjson_mut_write_opts(doc, YYJSON_WRITE_PRETTY, NULL, NULL, &werr);
+  char *json =
+      yyjson_mut_write_opts(doc, YYJSON_WRITE_PRETTY, NULL, NULL, &werr);
   if (json) {
     printf("%s\n", json);
     free(json);
