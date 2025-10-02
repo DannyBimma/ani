@@ -4,6 +4,12 @@
  * Copyright: (c) 2025 Technomancer Pirate Captain. All Rights Reserved.
  */
 
+#include <locale.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "ani/cache.h"
 #include "ani/cli.h"
 #include "ani/http.h"
@@ -14,10 +20,6 @@
 #include "ani/providers/jikan.h"
 #include "ani/providers/mangadex.h"
 #include "ani/version.h"
-#include <locale.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 static int process_query(const ani_cli_options *opts) {
   ani_result *result;
