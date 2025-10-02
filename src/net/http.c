@@ -42,6 +42,7 @@ static size_t write_callback(void *contents, size_t size, size_t nmemb,
     new_data = realloc(buf->data, new_capacity);
     if (new_data == NULL) {
       LOG_ERROR("Failed to allocate memory for HTTP response");
+
       return 0;
     }
 
@@ -96,7 +97,7 @@ ani_http_request_internal(const char *url,
     config = &default_config;
   }
 
-  // Initialize response buffer
+  // Init response buffer
   buf.capacity = 4096;
   buf.data = malloc(buf.capacity);
   buf.size = 0;
@@ -109,6 +110,7 @@ ani_http_request_internal(const char *url,
   resp = calloc(1, sizeof(*resp));
   if (resp == NULL) {
     free(buf.data);
+
     return NULL;
   }
 
@@ -116,17 +118,18 @@ ani_http_request_internal(const char *url,
   if (curl == NULL) {
     free(buf.data);
     free(resp);
+
     return NULL;
   }
 
   // Set URL
   curl_easy_setopt(curl, CURLOPT_URL, url);
 
-  // Set timeouts
+  // Set time-outs
   curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, config->connect_timeout_ms);
   curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, config->timeout_ms);
 
-  // Set User-Agent
+  // Set user-agent
   if (config->user_agent != NULL) {
     curl_easy_setopt(curl, CURLOPT_USERAGENT, config->user_agent);
   }
