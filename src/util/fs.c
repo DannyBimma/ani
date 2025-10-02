@@ -109,10 +109,12 @@ bool ani_mkdir_p(const char *path) {
       if (stat(copy, &st) != 0) {
         if (mkdir(copy, 0755) != 0 && errno != EEXIST) {
           free(copy);
+
           return false;
         }
       } else if (!S_ISDIR(st.st_mode)) {
         free(copy);
+
         return false;
       }
 
@@ -145,7 +147,7 @@ char *ani_path_join(const char *base, const char *name) {
   base_len = strlen(base);
   name_len = strlen(name);
 
-  // Check if we need a separator
+  // Check separator needed
   needs_sep =
       base_len > 0 && base[base_len - 1] != '/' && base[base_len - 1] != '\\';
 
