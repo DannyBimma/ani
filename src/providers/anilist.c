@@ -53,6 +53,7 @@ bool ani_anilist_get_next_episode(const char *mal_id, ani_series *series) {
   if (resp == NULL || resp->status_code != 200) {
     LOG_WARN("AniList query failed: HTTP %ld", resp ? resp->status_code : 0);
     ani_http_response_free(resp);
+
     return false;
   }
 
