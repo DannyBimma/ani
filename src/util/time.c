@@ -128,6 +128,7 @@ void ani_format_datetime(const ani_date *date, char *buf, size_t size) {
 
   if (!date->has_time || date->hour < 0) {
     ani_format_date(date, buf, size);
+
     return;
   }
 
