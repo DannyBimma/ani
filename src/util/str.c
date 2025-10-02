@@ -75,6 +75,7 @@ int ani_strcasecmp(const char *s1, const char *s2) {
     s1++;
     s2++;
   }
+
   return tolower((unsigned char)*s1) - tolower((unsigned char)*s2);
 }
 
@@ -91,6 +92,7 @@ int ani_strncasecmp(const char *s1, const char *s2, size_t n) {
       break;
     }
   }
+
   return 0;
 }
 
